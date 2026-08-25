@@ -181,6 +181,7 @@
     display: flex; align-items: center; gap: 10px; padding: 6px 10px; border: 1px solid var(--bd);
     border-radius: 5px; background: var(--fld); margin-bottom: 8px;
   }
+  .custom-row.editing-row { border-color: var(--accent); }
   .custom-row .drag { color: var(--faint); font-size: 11px; letter-spacing: -.1em; }
   .custom-row .label { font-size: 12px; font-weight: 500; }
   .custom-row .cat {
@@ -191,7 +192,10 @@
     flex: 1; min-width: 0; font-size: 10px; color: var(--faint); overflow: hidden; text-overflow: ellipsis;
     white-space: nowrap; text-align: right;
   }
-  .custom-form { display: grid; grid-template-columns: 1fr 1fr 1.5fr auto; gap: 8px; }
+  .custom-form { display: grid; grid-template-columns: 1fr 1fr 1.5fr auto auto; gap: 8px; }
+  .custom-form.editing { outline: 1px solid var(--accent); outline-offset: 4px; border-radius: 5px; }
+  .custom-form #cancelEdit { display: none; }
+  .custom-form.editing #cancelEdit { display: inline-block; }
   .custom-form input {
     min-width: 0; border: 1px solid var(--bd); border-radius: 5px; background: var(--fld); color: var(--fg);
     font-family: inherit; font-size: 11px; padding: 0 10px; height: 34px; outline: none;
@@ -227,6 +231,7 @@
   .preview-group-head .rule { flex: 1; height: 1px; background: var(--rule); }
   .preview-row { display: flex; align-items: center; gap: 8px; padding: 5px 12px 5px 10px; }
   .preview-row .bar { width: 2px; align-self: stretch; background: transparent; border-radius: 1px; }
+  .preview-row .fav { width: 14px; height: 14px; flex: none; border-radius: 3px; background: #fff; padding: 1px; box-shadow: 0 0 0 1px rgba(0, 0, 0, .08); box-sizing: border-box; }
   .preview-row.hot { background: rgba(0, 192, 181, .10); }
   .preview-row.hot .bar { background: var(--accent); }
   .preview-row .label { font-size: 12px; font-weight: 500; white-space: nowrap; }
@@ -316,6 +321,7 @@
         <input type="text" id="customLabel" placeholder="label">
         <input type="url" id="customUrl" placeholder="https://…">
         <button id="addCustom" class="btn-primary">add</button>
+        <button type="button" id="cancelEdit" class="btn btn-ghost">cancel</button>
       </div>
       <datalist id="categoryOptions"></datalist>
       <p class="hint">New category names create a new group; existing names append to that group.</p>
@@ -376,6 +382,10 @@
         <button id="copyBtn" class="btn btn-lg">copy</button>
         <span id="copyStatus"></span>
       </div>
+      <div class="row">
+        <button id="saveHtmlBtn" class="btn btn-lg">save as html page</button>
+        <span class="hint">standalone page you can save and open locally, no bookmark needed</span>
+      </div>
     </div>
 
     <div class="step-head">
@@ -393,6 +403,7 @@
 
 <script src="../data/links.js"></script>
 <script src="../scripts/lib.js"></script>
+<script src="../scripts/staticpage.js"></script>
 <script>
 (function () {
   var DEFAULTS = window.RF_BOOKMARKS_DEFAULT;
@@ -459,6 +470,14 @@
 
   function pad(n) { n = String(n); return n.length < 2 ? '0' + n : n; }
   function short(url) { return url.replace(/^https?:\/\//, ''); }
+
+  function faviconUrl(url) {
+    try {
+      return 'https://www.google.com/s2/favicons?sz=32&domain=' + encodeURIComponent(new URL(url).hostname);
+    } catch (e) {
+      return '';
+    }
+  }
   function key(cat, label) { return cat + '::' + label; }
 
   function allCategoryNames() {
@@ -663,6 +682,30 @@
     return { category: category, label: label, url: url };
   }
 
+  var editingCustomIndex = -1;
+
+  function startEditCustom(i) {
+    editingCustomIndex = i;
+    var entry = state.custom[i];
+    document.getElementById('customCategory').value = entry.category;
+    document.getElementById('customLabel').value = entry.label;
+    document.getElementById('customUrl').value = entry.url;
+    document.getElementById('addCustom').textContent = 'save';
+    document.querySelector('.custom-form').classList.add('editing');
+    renderCustom();
+    document.getElementById('customLabel').focus();
+  }
+
+  function cancelEditCustom() {
+    editingCustomIndex = -1;
+    document.getElementById('customCategory').value = '';
+    document.getElementById('customLabel').value = '';
+    document.getElementById('customUrl').value = '';
+    document.getElementById('addCustom').textContent = 'add';
+    document.querySelector('.custom-form').classList.remove('editing');
+    renderCustom();
+  }
+
   function moveCustom(i, delta) {
     var j = i + delta;
     if (j < 0 || j >= state.custom.length) return;
@@ -717,14 +760,24 @@
       downBtn.disabled = i === state.custom.length - 1;
       downBtn.addEventListener('click', function () { moveCustom(i, 1); });
 
+      var editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'btn btn-ghost';
+      editBtn.textContent = 'edit';
+      editBtn.addEventListener('click', function () { startEditCustom(i); });
+
       var removeBtn = document.createElement('button');
       removeBtn.type = 'button';
       removeBtn.className = 'btn btn-ghost';
       removeBtn.textContent = 'del';
       removeBtn.addEventListener('click', function () {
         state.custom.splice(i, 1);
+        if (editingCustomIndex === i) cancelEditCustom();
+        else if (editingCustomIndex > i) editingCustomIndex--;
         saveState(); renderCustom(); renderCategoryOptions(); renderPreview();
       });
+
+      if (i === editingCustomIndex) row.classList.add('editing-row');
 
       row.appendChild(drag);
       row.appendChild(label);
@@ -732,6 +785,7 @@
       row.appendChild(url);
       row.appendChild(upBtn);
       row.appendChild(downBtn);
+      row.appendChild(editBtn);
       row.appendChild(removeBtn);
       container.appendChild(row);
     });
@@ -791,6 +845,14 @@
         first = false;
         var bar = document.createElement('span');
         bar.className = 'bar';
+        var fav = document.createElement('img');
+        fav.className = 'fav';
+        fav.src = faviconUrl(link[1]);
+        fav.width = 14;
+        fav.height = 14;
+        fav.alt = '';
+        fav.loading = 'lazy';
+        fav.onerror = function () { this.style.visibility = 'hidden'; };
         var label = document.createElement('span');
         label.className = 'label';
         label.textContent = link[0];
@@ -798,6 +860,7 @@
         url.className = 'url';
         url.textContent = short(link[1]);
         row.appendChild(bar);
+        row.appendChild(fav);
         row.appendChild(label);
         row.appendChild(url);
         body.appendChild(row);
@@ -828,6 +891,8 @@
     var dragLink = document.getElementById('dragLink');
     var charCount = document.getElementById('charCount');
     var codePreview = document.getElementById('codePreview');
+
+    document.getElementById('saveHtmlBtn').disabled = !bookmarklet;
 
     if (!bookmarklet) {
       dragLink.setAttribute('href', 'javascript:void(0)');
@@ -898,13 +963,20 @@
     );
     if (!entry) return;
 
-    state.custom.push(entry);
+    if (editingCustomIndex >= 0) {
+      state.custom[editingCustomIndex] = entry;
+      cancelEditCustom();
+    } else {
+      state.custom.push(entry);
+      document.getElementById('customLabel').value = '';
+      document.getElementById('customUrl').value = '';
+    }
     saveState();
-    document.getElementById('customLabel').value = '';
-    document.getElementById('customUrl').value = '';
     renderCustom();
     renderPreview();
   });
+
+  document.getElementById('cancelEdit').addEventListener('click', cancelEditCustom);
 
   // --- Import: reconstruct builder state from a pasted bookmarklet ---
 
@@ -1036,6 +1108,22 @@
       document.body.removeChild(ta);
       done();
     }
+  });
+
+  document.getElementById('saveHtmlBtn').addEventListener('click', function () {
+    var categories = buildCategories();
+    if (!categories.length) return;
+    var title = state.title || 'RF Links';
+    var html = buildStaticPage(categories, { title: title, newTab: state.newTab !== false });
+    var blob = new Blob([html], { type: 'text/html' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '.html' || 'rf-links.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   });
 
   paintTheme();

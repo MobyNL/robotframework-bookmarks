@@ -37,6 +37,7 @@
       'var newTab=' + (newTab ? 'true' : 'false') + ';' +
       "var dark=localStorage.getItem(" + storageKeyJson + ")!=='light';" +
       "function pad(n){n=String(n);return n.length<2?'0'+n:n;}" +
+      "function fav(u){try{return 'https://www.google.com/s2/favicons?sz=32&domain='+encodeURIComponent(new URL(u).hostname);}catch(e){return '';}}" +
       "var THEMES={dark:{bg:'#101317',bar:'#0c0f13',fg:'#e8eaee',mut:'#767f8d',faint:'#4b5361',bd:'#232830',rule:'#1b2027',sel:'rgba(0,192,181,.10)',urlsel:'#8fd6d0',scrim:'rgba(6,8,10,.72)',shadow:'0 24px 64px rgba(0,0,0,.6)'},light:{bg:'#ffffff',bar:'#fafaf8',fg:'#14171c',mut:'#6f7681',faint:'#a3a9b3',bd:'#c9cbc4',rule:'#e6e7e2',sel:'rgba(0,192,181,.12)',urlsel:'#3f8b85',scrim:'rgba(16,19,23,.58)',shadow:'0 30px 70px rgba(12,14,17,.45)'}};" +
       "var w=document.createElement('div');w.id=ID;" +
       "var s=document.createElement('style');" +
@@ -58,6 +59,7 @@
       "'#'+ID+' .gh .ct{font-size:10px;color:var(--rfbm-faint)}'+" +
       "'#'+ID+' a.row{display:flex;align-items:center;gap:12px;padding:7px 14px 7px 12px;text-decoration:none;cursor:pointer}'+" +
       "'#'+ID+' a.row .bar{width:2px;align-self:stretch;background:transparent;border-radius:1px}'+" +
+      "'#'+ID+' a.row .fav{width:14px;height:14px;flex:none;border-radius:3px;background:#fff;padding:1px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}'+" +
       "'#'+ID+' a.row .lbl{font-size:13px;font-weight:500;color:var(--rfbm-fg);white-space:nowrap}'+" +
       "'#'+ID+' a.row .url{flex:1;min-width:0;font-size:11px;color:var(--rfbm-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;direction:rtl}'+" +
       "'#'+ID+' a.row .ent{font-size:11px;color:#00c0b5;opacity:0}'+" +
@@ -76,7 +78,7 @@
       "var body='<div class=\"p\"><div class=\"h\"><img src=\"'+LOGO+'\" width=\"18\" height=\"18\" alt=\"\"><span class=\"chev\">&#8250;</span><input id=\"'+ID+'q\" spellcheck=\"false\" autocomplete=\"off\" placeholder=\"search links, categories, urls\"><span class=\"cnt\" id=\"'+ID+'cnt\"></span><button id=\"'+ID+'t\" title=\"Toggle theme\"></button><button id=\"'+ID+'x\" title=\"Close\">ESC</button></div><div class=\"b\">';" +
       "D.forEach(function(c){body+='<div class=\"g\"><div class=\"gh\"><span class=\"nm\">'+c[0]+'</span><span class=\"rl\"></span><span class=\"ct\">'+pad(c[1].length)+'</span></div>';c[1].forEach(function(l){body+='<a class=\"row\" href=\"'+l[1]+'\"" +
       anchorAttrs +
-      " data-s=\"'+(l[0]+' '+c[0]+' '+l[1]).toLowerCase().replace(/\"/g,'')+'\"><span class=\"bar\"></span><span class=\"lbl\">'+l[0]+'</span><span class=\"url\">'+l[1].replace(/^https?:\\/\\//,'')+'</span><span class=\"ent\">&#8629;</span></a>';});body+='</div>';});" +
+      " data-s=\"'+(l[0]+' '+c[0]+' '+l[1]).toLowerCase().replace(/\"/g,'')+'\"><span class=\"bar\"></span><img class=\"fav\" src=\"'+fav(l[1])+'\" width=\"14\" height=\"14\" alt=\"\" loading=\"lazy\" onerror=\"this.style.visibility=&#39;hidden&#39;\"><span class=\"lbl\">'+l[0]+'</span><span class=\"url\">'+l[1].replace(/^https?:\\/\\//,'')+'</span><span class=\"ent\">&#8629;</span></a>';});body+='</div>';});" +
       "body+='<div class=\"empty\" id=\"'+ID+'empty\" style=\"display:none\">no match for &ldquo;<span id=\"'+ID+'eq\"></span>&rdquo;</div>';" +
       "body+='</div><div class=\"f\"><span class=\"k\"><kbd>&#8593;&#8595;</kbd> move</span><span class=\"k\"><kbd>&#8629;</kbd> open</span><span class=\"k\"><kbd>&#8984;&#8629;</kbd> new tab</span><span class=\"brand\">rf&#8201;links</span></div></div>';" +
       "var d=document.createElement('div');d.innerHTML=body;while(d.firstChild){w.appendChild(d.firstChild);}" +
