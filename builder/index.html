@@ -150,9 +150,16 @@
     border-bottom: 1px solid var(--rule);
   }
   .preset-group-head .drag { color: var(--faint); font-size: 11px; letter-spacing: -.1em; }
-  .preset-group-head .name { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
+  .preset-group-head .chev {
+    color: var(--mut); font-size: 10px; width: 14px; flex: none; background: none; border: 0; padding: 0;
+    cursor: pointer; font-family: inherit; line-height: 1; text-align: center;
+  }
+  .preset-group-head .chev:hover { color: var(--accent); }
+  .preset-group-head .name { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
   .preset-group-head .tally { font-size: 10px; color: var(--faint); }
   .preset-group-head .spacer { flex: 1; }
+  .preset-group-head .order-btn[disabled] { opacity: .3; cursor: default; }
+  .preset-group-head .order-btn[disabled]:hover { border-color: var(--bd); color: var(--mut); }
 
   .preset-row {
     display: flex; align-items: center; gap: 10px; padding: 6px 12px; cursor: pointer;
@@ -324,7 +331,7 @@
         <textarea id="importInput" class="mono" rows="3" spellcheck="false"
           placeholder="javascript:(function(){...})();"></textarea>
         <div class="row">
-          <button id="importBtn" class="btn-lg">import</button>
+          <button id="importBtn" class="btn btn-lg">import</button>
           <span id="importStatus" class="hint"></span>
         </div>
       </div>
@@ -366,7 +373,7 @@
       </div>
       <div class="code-box" id="codePreview"></div>
       <div class="row">
-        <button id="copyBtn" class="btn-lg">copy</button>
+        <button id="copyBtn" class="btn btn-lg">copy</button>
         <span id="copyStatus"></span>
       </div>
     </div>
@@ -399,7 +406,7 @@
         selected[cat[0] + '::' + link[0]] = true;
       });
     });
-    return { title: 'RF Links', newTab: true, selected: selected, custom: [] };
+    return { title: 'RF Links', newTab: true, selected: selected, custom: [], categoryOrder: [], collapsed: {} };
   }
 
   function loadState() {
@@ -409,6 +416,8 @@
         var parsed = JSON.parse(raw);
         if (parsed && parsed.selected && parsed.custom) {
           if (typeof parsed.newTab !== 'boolean') parsed.newTab = true;
+          if (!Array.isArray(parsed.categoryOrder)) parsed.categoryOrder = [];
+          if (!parsed.collapsed || typeof parsed.collapsed !== 'object') parsed.collapsed = {};
           return parsed;
         }
       }
@@ -470,6 +479,30 @@
     });
   }
 
+  // --- Category order (custom order of preset + custom groups) ---
+
+  function orderedCategoryNames() {
+    var known = allCategoryNames();
+    var order = (state.categoryOrder || []).filter(function (n) { return known.indexOf(n) > -1; });
+    known.forEach(function (n) { if (order.indexOf(n) === -1) order.push(n); });
+    return order;
+  }
+
+  function moveCategory(name, delta) {
+    var order = orderedCategoryNames();
+    var i = order.indexOf(name);
+    var j = i + delta;
+    if (i === -1 || j < 0 || j >= order.length) return;
+    var tmp = order[i]; order[i] = order[j]; order[j] = tmp;
+    state.categoryOrder = order;
+    saveState(); renderPresets(); renderPreview();
+  }
+
+  function toggleCollapse(name) {
+    state.collapsed[name] = !state.collapsed[name];
+    saveState(); renderPresets();
+  }
+
   // --- Presets (02) ---
 
   function renderPresets() {
@@ -479,7 +512,14 @@
     var shownLinks = 0, totalLinks = 0;
     var anyGroup = false;
 
-    DEFAULTS.forEach(function (cat) {
+    var defaultsByName = {};
+    DEFAULTS.forEach(function (c) { defaultsByName[c[0]] = c; });
+    var order = orderedCategoryNames();
+
+    order.forEach(function (catName) {
+      var cat = defaultsByName[catName];
+      if (!cat) return;
+      var order_i = order.indexOf(catName);
       var links = cat[1].filter(function (l) {
         totalLinks++;
         return !f || (l[0] + ' ' + cat[0] + ' ' + l[1]).toLowerCase().indexOf(f) > -1;
@@ -488,22 +528,42 @@
       anyGroup = true;
       shownLinks += links.length;
 
+      var collapsed = !f && !!state.collapsed[cat[0]];
+
       var group = document.createElement('div');
 
       var head = document.createElement('div');
       head.className = 'preset-group-head';
-      var drag = document.createElement('span');
-      drag.className = 'drag';
-      drag.textContent = '⋮⋮';
+      var chev = document.createElement('button');
+      chev.type = 'button';
+      chev.className = 'chev';
+      chev.textContent = collapsed ? '▸' : '▾';
+      chev.title = collapsed ? 'Expand' : 'Collapse';
+      chev.addEventListener('click', function () { toggleCollapse(cat[0]); });
       var name = document.createElement('span');
       name.className = 'name';
       name.textContent = cat[0];
+      name.addEventListener('click', function () { toggleCollapse(cat[0]); });
       var tally = document.createElement('span');
       tally.className = 'tally';
       var onCount = cat[1].filter(function (l) { return !!state.selected[key(cat[0], l[0])]; }).length;
       tally.textContent = pad(onCount) + '/' + pad(cat[1].length);
       var spacer = document.createElement('span');
       spacer.className = 'spacer';
+      var upBtn = document.createElement('button');
+      upBtn.type = 'button';
+      upBtn.className = 'btn btn-ghost order-btn';
+      upBtn.textContent = '↑';
+      upBtn.title = 'Move category up';
+      upBtn.disabled = order_i === 0;
+      upBtn.addEventListener('click', function () { moveCategory(cat[0], -1); });
+      var downBtn = document.createElement('button');
+      downBtn.type = 'button';
+      downBtn.className = 'btn btn-ghost order-btn';
+      downBtn.textContent = '↓';
+      downBtn.title = 'Move category down';
+      downBtn.disabled = order_i === order.length - 1;
+      downBtn.addEventListener('click', function () { moveCategory(cat[0], 1); });
       var allBtn = document.createElement('button');
       allBtn.type = 'button';
       allBtn.className = 'btn btn-ghost';
@@ -520,13 +580,20 @@
         cat[1].forEach(function (l) { delete state.selected[key(cat[0], l[0])]; });
         saveState(); renderPresets(); renderPreview();
       });
-      head.appendChild(drag);
+      head.appendChild(chev);
       head.appendChild(name);
       head.appendChild(tally);
       head.appendChild(spacer);
+      head.appendChild(upBtn);
+      head.appendChild(downBtn);
       head.appendChild(allBtn);
       head.appendChild(noneBtn);
       group.appendChild(head);
+
+      if (collapsed) {
+        container.appendChild(group);
+        return;
+      }
 
       links.forEach(function (link) {
         var k = key(cat[0], link[0]);
@@ -672,22 +739,23 @@
 
   function buildCategories() {
     var result = [];
-    var catIndex = {};
-    DEFAULTS.forEach(function (cat) {
-      var links = cat[1].filter(function (link) {
-        return !!state.selected[key(cat[0], link[0])];
-      });
-      if (links.length) {
-        catIndex[cat[0]] = result.length;
-        result.push([cat[0], links.slice()]);
-      }
-    });
+    var defaultsByName = {};
+    DEFAULTS.forEach(function (cat) { defaultsByName[cat[0]] = cat; });
+    var customByCat = {};
     state.custom.forEach(function (entry) {
-      if (!(entry.category in catIndex)) {
-        catIndex[entry.category] = result.length;
-        result.push([entry.category, []]);
+      (customByCat[entry.category] = customByCat[entry.category] || []).push([entry.label, entry.url]);
+    });
+
+    orderedCategoryNames().forEach(function (name) {
+      var links = [];
+      var defCat = defaultsByName[name];
+      if (defCat) {
+        links = links.concat(defCat[1].filter(function (link) {
+          return !!state.selected[key(name, link[0])];
+        }));
       }
-      result[catIndex[entry.category]][1].push([entry.label, entry.url]);
+      if (customByCat[name]) links = links.concat(customByCat[name]);
+      if (links.length) result.push([name, links]);
     });
     return result;
   }
