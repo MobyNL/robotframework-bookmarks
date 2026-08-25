@@ -490,9 +490,14 @@
 
   function moveCategory(name, delta) {
     var order = orderedCategoryNames();
+    var defaultsByName = {};
+    DEFAULTS.forEach(function (c) { defaultsByName[c[0]] = c; });
+    var visible = order.filter(function (n) { return !!defaultsByName[n]; });
+    var vi = visible.indexOf(name);
+    var vj = vi + delta;
+    if (vi === -1 || vj < 0 || vj >= visible.length) return;
     var i = order.indexOf(name);
-    var j = i + delta;
-    if (i === -1 || j < 0 || j >= order.length) return;
+    var j = order.indexOf(visible[vj]);
     var tmp = order[i]; order[i] = order[j]; order[j] = tmp;
     state.categoryOrder = order;
     saveState(); renderPresets(); renderPreview();
@@ -514,12 +519,10 @@
 
     var defaultsByName = {};
     DEFAULTS.forEach(function (c) { defaultsByName[c[0]] = c; });
-    var order = orderedCategoryNames();
+    var order = orderedCategoryNames().filter(function (n) { return !!defaultsByName[n]; });
 
-    order.forEach(function (catName) {
+    order.forEach(function (catName, order_i) {
       var cat = defaultsByName[catName];
-      if (!cat) return;
-      var order_i = order.indexOf(catName);
       var links = cat[1].filter(function (l) {
         totalLinks++;
         return !f || (l[0] + ' ' + cat[0] + ' ' + l[1]).toLowerCase().indexOf(f) > -1;
@@ -979,6 +982,7 @@
 
     state.selected = newSelected;
     state.custom = newCustom;
+    state.categoryOrder = parsed.categories.map(function (cat) { return cat[0]; });
     state.title = parsed.title || state.title;
     state.newTab = parsed.newTab;
     saveState();
