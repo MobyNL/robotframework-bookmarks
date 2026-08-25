@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RF Links — Bookmarklet Builder</title>
+<style>
+  :root {
+    --accent: #00c0b5;
+    --bg: #fff;
+    --fg: #1c1f26;
+    --mut: #6b7280;
+    --bd: #e2e5ea;
+    --fld: #f4f5f7;
+    --hov: #f0fdfc;
+    --card: #fafbfc;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a;
+      --fg: #e6e8ec;
+      --mut: #9aa1ad;
+      --bd: #2c313b;
+      --fld: #1d2027;
+      --hov: #182320;
+      --card: #1a1d23;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.45;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--bd);
+  }
+  header img { display: block; }
+  header h1 { font-size: 18px; margin: 0; }
+  header p { margin: 2px 0 0; font-size: 13px; color: var(--mut); }
+  main {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 24px;
+    display: grid;
+    gap: 24px;
+  }
+  section.card {
+    border: 1px solid var(--bd);
+    border-radius: 12px;
+    background: var(--card);
+    padding: 16px 18px;
+  }
+  section.card > h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--mut);
+    margin: 0 0 12px;
+  }
+  label { font-size: 14px; }
+  input[type="text"], input[type="url"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--bd);
+    border-radius: 8px;
+    background: var(--fld);
+    color: var(--fg);
+    font-size: 14px;
+    outline: none;
+  }
+  input[type="text"]:focus, input[type="url"]:focus { border-color: var(--accent); }
+  button {
+    cursor: pointer;
+    border: 1px solid var(--bd);
+    background: transparent;
+    color: var(--fg);
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+  button:hover { background: var(--hov); border-color: var(--accent); }
+  button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #06201e;
+    font-weight: 600;
+  }
+  button.primary:hover { filter: brightness(1.05); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .toolbar { margin-bottom: 14px; }
+  fieldset {
+    border: 1px solid var(--bd);
+    border-radius: 10px;
+    margin: 0 0 12px;
+    padding: 10px 12px 12px;
+  }
+  fieldset:last-child { margin-bottom: 0; }
+  legend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 6px;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  legend .legend-actions { font-weight: 400; }
+  legend .legend-actions button { padding: 3px 8px; font-size: 12px; }
+  .link-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 4px;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  .link-row:hover { background: var(--hov); }
+  .link-row label { flex: 1; cursor: pointer; }
+  .link-row small { display: block; color: var(--mut); font-size: 11px; word-break: break-all; }
+  .link-row button.remove { padding: 2px 7px; font-size: 12px; color: #c0392b; border-color: transparent; }
+  .link-row button { padding: 2px 7px; font-size: 12px; }
+  .link-row button[disabled] { opacity: .3; cursor: default; }
+  .link-row button[disabled]:hover { background: transparent; border-color: var(--bd); }
+  .custom-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.4fr auto;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .custom-form input { min-width: 0; }
+  @media (max-width: 640px) {
+    .custom-form { grid-template-columns: 1fr; }
+  }
+  .mono {
+    width: 100%;
+    min-height: 110px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    padding: 10px;
+    border: 1px solid var(--bd);
+    border-radius: 8px;
+    background: var(--fld);
+    color: var(--fg);
+    resize: vertical;
+  }
+  .mono:focus { border-color: var(--accent); outline: none; }
+  .edit-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.4fr auto auto;
+    gap: 8px;
+    flex: 1;
+    align-items: center;
+  }
+  .edit-form input { min-width: 0; }
+  @media (max-width: 640px) {
+    .edit-form { grid-template-columns: 1fr; }
+  }
+  #dragLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #06201e;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: grab;
+  }
+  #charCount { font-size: 12px; color: var(--mut); }
+  .hint { font-size: 12px; color: var(--mut); margin-top: 6px; }
+  #copyStatus { font-size: 12px; color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <img width="28" height="28" alt=""
+    src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyNCAyNCc+PHJlY3QgeD0nNCcgeT0nNycgd2lkdGg9JzE2JyBoZWlnaHQ9JzEyJyByeD0nMycgZmlsbD0nIzAwYzBiNScvPjxyZWN0IHg9JzExJyB5PScyLjUnIHdpZHRoPScyJyBoZWlnaHQ9JzQuNScgcng9JzEnIGZpbGw9JyMwMGMwYjUnLz48Y2lyY2xlIGN4PScxMicgY3k9JzIuMicgcj0nMS43JyBmaWxsPScjMDBjMGI1Jy8+PGNpcmNsZSBjeD0nOScgY3k9JzEzJyByPScxLjknIGZpbGw9JyNmZmZmZmYnLz48Y2lyY2xlIGN4PScxNScgY3k9JzEzJyByPScxLjknIGZpbGw9JyNmZmZmZmYnLz48cmVjdCB4PSc5JyB5PScxNi4yJyB3aWR0aD0nNicgaGVpZ2h0PScxLjYnIHJ4PScuOCcgZmlsbD0nI2ZmZmZmZicvPjwvc3ZnPg==">
+  <div>
+    <h1>RF Links — Bookmarklet Builder</h1>
+    <p>Pick which links to include, add your own, drag the result to your bookmarks bar.</p>
+  </div>
+</header>
+
+<main>
+
+  <section class="card">
+    <h2>Bookmark name</h2>
+    <input type="text" id="titleInput" maxlength="40" value="RF Links">
+    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;cursor:pointer">
+      <input type="checkbox" id="newTabInput" checked style="width:auto">
+      Open links in a new tab (unchecked: opens in the current tab)
+    </label>
+  </section>
+
+  <section class="card">
+    <h2>Import an existing bookmarklet</h2>
+    <p class="hint" style="margin:0 0 8px">Paste a bookmarklet made by this builder (or the
+      default one from the README) to load its links here for editing. This replaces your
+      current selection below.</p>
+    <textarea id="importInput" class="mono" rows="4" spellcheck="false"
+      placeholder="javascript:(function(){...})();"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button id="importBtn" class="primary">Import</button>
+      <span id="importStatus" class="hint" style="margin:0"></span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Presets — mix &amp; match</h2>
+    <div class="row toolbar">
+      <button id="selectAll">Select all</button>
+      <button id="selectNone">Select none</button>
+      <button id="selectDefaults">Reset to repo defaults</button>
+    </div>
+    <div id="presetList"></div>
+  </section>
+
+  <section class="card">
+    <h2>Your own links</h2>
+    <div id="customList"></div>
+    <div class="custom-form">
+      <input type="text" id="customCategory" placeholder="Category (existing or new)" list="categoryOptions">
+      <input type="text" id="customLabel" placeholder="Label">
+      <input type="url" id="customUrl" placeholder="https://…">
+      <button id="addCustom" class="primary">Add</button>
+    </div>
+    <datalist id="categoryOptions"></datalist>
+    <p class="hint">New category names create a new group in the overlay; existing names append to that group.</p>
+  </section>
+
+  <section class="card">
+    <h2>Your bookmarklet</h2>
+    <p class="hint">Drag this to your bookmarks bar, or copy the text below into a new bookmark's URL field.</p>
+    <p><a id="dragLink" href="javascript:void(0)">RF Links</a></p>
+    <textarea id="output" class="mono" readonly spellcheck="false"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button id="copyBtn">Copy to clipboard</button>
+      <span id="copyStatus"></span>
+      <span id="charCount" style="margin-left:auto"></span>
+    </div>
+  </section>
+
+</main>
+
+<script src="../data/links.js"></script>
+<script src="../scripts/lib.js"></script>
+<script>
+(function () {
+  var DEFAULTS = window.RF_BOOKMARKS_DEFAULT;
+  var STORAGE_KEY = 'rf-bookmarks-builder-state-v1';
+
+  function defaultState() {
+    var selected = {};
+    DEFAULTS.forEach(function (cat) {
+      cat[1].forEach(function (link) {
+        selected[cat[0] + '::' + link[0]] = true;
+      });
+    });
+    return { title: 'RF Links', newTab: true, selected: selected, custom: [] };
+  }
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (parsed && parsed.selected && parsed.custom) {
+          if (typeof parsed.newTab !== 'boolean') parsed.newTab = true;
+          return parsed;
+        }
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  var state = loadState() || defaultState();
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function allCategoryNames() {
+    var names = DEFAULTS.map(function (c) { return c[0]; });
+    state.custom.forEach(function (entry) {
+      if (names.indexOf(entry.category) === -1) names.push(entry.category);
+    });
+    return names;
+  }
+
+  function renderCategoryOptions() {
+    var dl = document.getElementById('categoryOptions');
+    dl.innerHTML = '';
+    allCategoryNames().forEach(function (name) {
+      var opt = document.createElement('option');
+      opt.value = name;
+      dl.appendChild(opt);
+    });
+  }
+
+  function renderPresets() {
+    var container = document.getElementById('presetList');
+    container.innerHTML = '';
+    DEFAULTS.forEach(function (cat) {
+      var fs = document.createElement('fieldset');
+
+      var legend = document.createElement('legend');
+      var span = document.createElement('span');
+      span.textContent = cat[0];
+      legend.appendChild(span);
+      var actions = document.createElement('span');
+      actions.className = 'legend-actions';
+      var allBtn = document.createElement('button');
+      allBtn.type = 'button';
+      allBtn.textContent = 'All';
+      allBtn.addEventListener('click', function () {
+        cat[1].forEach(function (l) { state.selected[cat[0] + '::' + l[0]] = true; });
+        saveState(); renderPresets(); regenerate();
+      });
+      var noneBtn = document.createElement('button');
+      noneBtn.type = 'button';
+      noneBtn.textContent = 'None';
+      noneBtn.addEventListener('click', function () {
+        cat[1].forEach(function (l) { delete state.selected[cat[0] + '::' + l[0]]; });
+        saveState(); renderPresets(); regenerate();
+      });
+      actions.appendChild(allBtn);
+      actions.appendChild(noneBtn);
+      legend.appendChild(actions);
+      fs.appendChild(legend);
+
+      cat[1].forEach(function (link) {
+        var key = cat[0] + '::' + link[0];
+        var row = document.createElement('div');
+        row.className = 'link-row';
+
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = !!state.selected[key];
+        cb.id = 'chk-' + key.replace(/[^a-z0-9]/gi, '-');
+        cb.addEventListener('change', function () {
+          if (cb.checked) state.selected[key] = true; else delete state.selected[key];
+          saveState(); regenerate();
+        });
+
+        var label = document.createElement('label');
+        label.setAttribute('for', cb.id);
+        label.textContent = link[0];
+        var small = document.createElement('small');
+        small.textContent = link[1];
+        label.appendChild(small);
+
+        row.appendChild(cb);
+        row.appendChild(label);
+        fs.appendChild(row);
+      });
+
+      container.appendChild(fs);
+    });
+  }
+
+  var editingCustomIndex = -1;
+
+  function moveCustom(i, delta) {
+    var j = i + delta;
+    if (j < 0 || j >= state.custom.length) return;
+    var tmp = state.custom[i];
+    state.custom[i] = state.custom[j];
+    state.custom[j] = tmp;
+    if (editingCustomIndex === i) editingCustomIndex = j;
+    else if (editingCustomIndex === j) editingCustomIndex = i;
+    saveState(); renderCustom(); regenerate();
+  }
+
+  function validateEntry(category, label, url) {
+    category = (category || '').trim();
+    label = (label || '').trim();
+    url = (url || '').trim();
+    if (!category || !label || !url) {
+      alert('Category, label, and URL are all required.');
+      return null;
+    }
+    try {
+      var u = new URL(url);
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') throw new Error('bad protocol');
+    } catch (e) {
+      alert('Enter a valid http(s):// URL.');
+      return null;
+    }
+    return { category: category, label: label, url: url };
+  }
+
+  function renderCustom() {
+    var container = document.getElementById('customList');
+    container.innerHTML = '';
+    if (!state.custom.length) {
+      var p = document.createElement('p');
+      p.className = 'hint';
+      p.textContent = 'No custom links yet — add one below.';
+      container.appendChild(p);
+    }
+    state.custom.forEach(function (entry, i) {
+      var row = document.createElement('div');
+      row.className = 'link-row';
+
+      if (i === editingCustomIndex) {
+        var form = document.createElement('div');
+        form.className = 'edit-form';
+
+        var catInput = document.createElement('input');
+        catInput.type = 'text';
+        catInput.value = entry.category;
+        catInput.setAttribute('list', 'categoryOptions');
+
+        var labelInput = document.createElement('input');
+        labelInput.type = 'text';
+        labelInput.value = entry.label;
+
+        var urlInput = document.createElement('input');
+        urlInput.type = 'url';
+        urlInput.value = entry.url;
+
+        var saveBtn = document.createElement('button');
+        saveBtn.className = 'primary';
+        saveBtn.type = 'button';
+        saveBtn.textContent = 'Save';
+        saveBtn.addEventListener('click', function () {
+          var updated = validateEntry(catInput.value, labelInput.value, urlInput.value);
+          if (!updated) return;
+          state.custom[i] = updated;
+          editingCustomIndex = -1;
+          saveState(); renderCustom(); regenerate();
+        });
+
+        var cancelBtn = document.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.addEventListener('click', function () {
+          editingCustomIndex = -1;
+          renderCustom();
+        });
+
+        form.appendChild(catInput);
+        form.appendChild(labelInput);
+        form.appendChild(urlInput);
+        form.appendChild(saveBtn);
+        form.appendChild(cancelBtn);
+        row.appendChild(form);
+        container.appendChild(row);
+        return;
+      }
+
+      var label = document.createElement('label');
+      label.textContent = entry.label + '  ·  ' + entry.category;
+      var small = document.createElement('small');
+      small.textContent = entry.url;
+      label.appendChild(small);
+
+      var upBtn = document.createElement('button');
+      upBtn.type = 'button';
+      upBtn.textContent = '↑';
+      upBtn.title = 'Move up';
+      upBtn.disabled = i === 0;
+      upBtn.addEventListener('click', function () { moveCustom(i, -1); });
+
+      var downBtn = document.createElement('button');
+      downBtn.type = 'button';
+      downBtn.textContent = '↓';
+      downBtn.title = 'Move down';
+      downBtn.disabled = i === state.custom.length - 1;
+      downBtn.addEventListener('click', function () { moveCustom(i, 1); });
+
+      var editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.textContent = 'Edit';
+      editBtn.addEventListener('click', function () {
+        editingCustomIndex = i;
+        renderCustom();
+      });
+
+      var removeBtn = document.createElement('button');
+      removeBtn.className = 'remove';
+      removeBtn.type = 'button';
+      removeBtn.textContent = 'Remove';
+      removeBtn.addEventListener('click', function () {
+        state.custom.splice(i, 1);
+        if (editingCustomIndex === i) editingCustomIndex = -1;
+        saveState(); renderCustom(); renderCategoryOptions(); regenerate();
+      });
+
+      row.appendChild(label);
+      row.appendChild(upBtn);
+      row.appendChild(downBtn);
+      row.appendChild(editBtn);
+      row.appendChild(removeBtn);
+      container.appendChild(row);
+    });
+    renderCategoryOptions();
+  }
+
+  function buildCategories() {
+    var result = [];
+    var catIndex = {};
+    DEFAULTS.forEach(function (cat) {
+      var links = cat[1].filter(function (link) {
+        return !!state.selected[cat[0] + '::' + link[0]];
+      });
+      if (links.length) {
+        catIndex[cat[0]] = result.length;
+        result.push([cat[0], links.slice()]);
+      }
+    });
+    state.custom.forEach(function (entry) {
+      if (!(entry.category in catIndex)) {
+        catIndex[entry.category] = result.length;
+        result.push([entry.category, []]);
+      }
+      result[catIndex[entry.category]][1].push([entry.label, entry.url]);
+    });
+    return result;
+  }
+
+  function regenerate() {
+    var categories = buildCategories();
+    var title = state.title || 'RF Links';
+    var bookmarklet = categories.length
+      ? buildBookmarklet(categories, { title: title, newTab: state.newTab !== false })
+      : '';
+
+    var output = document.getElementById('output');
+    var dragLink = document.getElementById('dragLink');
+    var charCount = document.getElementById('charCount');
+
+    if (!bookmarklet) {
+      output.value = '';
+      dragLink.setAttribute('href', 'javascript:void(0)');
+      dragLink.textContent = 'Select at least one link';
+      charCount.textContent = '';
+      return;
+    }
+
+    output.value = bookmarklet;
+    dragLink.setAttribute('href', bookmarklet);
+    dragLink.textContent = title;
+    charCount.textContent = bookmarklet.length + ' characters';
+  }
+
+  document.getElementById('titleInput').addEventListener('input', function (e) {
+    state.title = e.target.value;
+    saveState();
+    regenerate();
+  });
+
+  document.getElementById('newTabInput').addEventListener('change', function (e) {
+    state.newTab = e.target.checked;
+    saveState();
+    regenerate();
+  });
+
+  document.getElementById('selectAll').addEventListener('click', function () {
+    DEFAULTS.forEach(function (cat) {
+      cat[1].forEach(function (l) { state.selected[cat[0] + '::' + l[0]] = true; });
+    });
+    saveState(); renderPresets(); regenerate();
+  });
+
+  document.getElementById('selectNone').addEventListener('click', function () {
+    state.selected = {};
+    saveState(); renderPresets(); regenerate();
+  });
+
+  document.getElementById('selectDefaults').addEventListener('click', function () {
+    var fresh = defaultState();
+    state.selected = fresh.selected;
+    saveState(); renderPresets(); regenerate();
+  });
+
+  document.getElementById('addCustom').addEventListener('click', function () {
+    var entry = validateEntry(
+      document.getElementById('customCategory').value,
+      document.getElementById('customLabel').value,
+      document.getElementById('customUrl').value
+    );
+    if (!entry) return;
+
+    state.custom.push(entry);
+    saveState();
+    document.getElementById('customLabel').value = '';
+    document.getElementById('customUrl').value = '';
+    renderCustom();
+    regenerate();
+  });
+
+  // --- Import: reconstruct builder state from a pasted bookmarklet ---
+
+  function extractBalancedArray(str, startIdx) {
+    var depth = 0, inStr = false;
+    for (var i = startIdx; i < str.length; i++) {
+      var ch = str[i];
+      if (inStr) {
+        if (ch === '\\') { i++; continue; }
+        if (ch === '"') inStr = false;
+        continue;
+      }
+      if (ch === '"') { inStr = true; continue; }
+      if (ch === '[') depth++;
+      else if (ch === ']') {
+        depth--;
+        if (depth === 0) return str.slice(startIdx, i + 1);
+      }
+    }
+    return null;
+  }
+
+  function parseImport(text) {
+    text = (text || '').trim();
+    if (!text) throw new Error('Paste a bookmarklet first.');
+    if (text.indexOf('javascript:') === 0) text = text.slice('javascript:'.length);
+
+    var dIdx = text.indexOf('var D=');
+    if (dIdx === -1) throw new Error('Could not find link data — is this an RF Links bookmarklet?');
+    var arrStart = text.indexOf('[', dIdx);
+    if (arrStart === -1) throw new Error('Could not parse link data.');
+    var arrText = extractBalancedArray(text, arrStart);
+    if (!arrText) throw new Error('Could not parse link data (unbalanced brackets).');
+
+    var categories;
+    try {
+      categories = JSON.parse(arrText);
+    } catch (e) {
+      throw new Error('Link data is not valid JSON.');
+    }
+    if (!Array.isArray(categories)) throw new Error('Unexpected link data shape.');
+    categories.forEach(function (cat) {
+      if (!Array.isArray(cat) || typeof cat[0] !== 'string' || !Array.isArray(cat[1])) {
+        throw new Error('Unexpected link data shape.');
+      }
+    });
+
+    var titleMatch = text.match(/<span class="t">'\+"((?:[^"\\]|\\.)*)"\+'<\/span>/);
+    var title = titleMatch ? JSON.parse('"' + titleMatch[1] + '"') : 'RF Links';
+    var newTab = text.indexOf('target="_blank"') !== -1;
+
+    return { categories: categories, title: title, newTab: newTab };
+  }
+
+  function applyImport(parsed) {
+    var defaultUrl = {};
+    DEFAULTS.forEach(function (cat) {
+      cat[1].forEach(function (l) { defaultUrl[cat[0] + '::' + l[0]] = l[1]; });
+    });
+
+    var newSelected = {};
+    var newCustom = [];
+    parsed.categories.forEach(function (cat) {
+      var catName = cat[0];
+      cat[1].forEach(function (link) {
+        var label = link[0], url = link[1];
+        var key = catName + '::' + label;
+        if (defaultUrl[key] === url) {
+          newSelected[key] = true;
+        } else {
+          newCustom.push({ category: catName, label: label, url: url });
+        }
+      });
+    });
+
+    state.selected = newSelected;
+    state.custom = newCustom;
+    state.title = parsed.title || state.title;
+    state.newTab = parsed.newTab;
+    editingCustomIndex = -1;
+    saveState();
+
+    document.getElementById('titleInput').value = state.title;
+    document.getElementById('newTabInput').checked = state.newTab;
+    renderPresets();
+    renderCustom();
+    regenerate();
+  }
+
+  document.getElementById('importBtn').addEventListener('click', function () {
+    var status = document.getElementById('importStatus');
+    try {
+      var parsed = parseImport(document.getElementById('importInput').value);
+      applyImport(parsed);
+      var linkCount = parsed.categories.reduce(function (n, c) { return n + c[1].length; }, 0);
+      status.textContent = 'Imported ' + parsed.categories.length + ' categories, ' + linkCount + ' links.';
+      status.style.color = 'var(--accent)';
+      document.getElementById('importInput').value = '';
+    } catch (e) {
+      status.textContent = e.message;
+      status.style.color = '#c0392b';
+    }
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', function () {
+    var output = document.getElementById('output');
+    var status = document.getElementById('copyStatus');
+    var done = function () {
+      status.textContent = 'Copied!';
+      setTimeout(function () { status.textContent = ''; }, 1500);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(output.value).then(done, function () {
+        output.select();
+        document.execCommand('copy');
+        done();
+      });
+    } else {
+      output.select();
+      document.execCommand('copy');
+      done();
+    }
+  });
+
+  document.getElementById('titleInput').value = state.title || 'RF Links';
+  document.getElementById('newTabInput').checked = state.newTab !== false;
+  renderPresets();
+  renderCustom();
+  regenerate();
+})();
+</script>
+</body>
+</html>

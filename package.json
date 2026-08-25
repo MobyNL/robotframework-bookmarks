@@ -1,0 +1,9 @@
+{
+  "name": "robotframework-bookmarks",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Bookmarklet generator and UI builder for Robot Framework doc links.",
+  "scripts": {
+    "build": "node scripts/build.js"
+  }
+}
