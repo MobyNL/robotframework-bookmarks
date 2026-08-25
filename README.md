@@ -1,5 +1,7 @@
 # robotframework-bookmarks
 
+🔧 **[Build your bookmarklet →](https://mobynl.github.io/robotframework-bookmarks/builder/)**
+
 A one-click **bookmarklet** launcher for Robot Framework docs, libraries, and tooling.
 
 Click it on any page and a command-palette-style overlay pops up with all the links
