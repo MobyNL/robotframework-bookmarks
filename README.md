@@ -43,56 +43,13 @@ Want a different mix of links, your own categories, or a different bookmark name
 Open [`builder/index.html`](builder/index.html) directly in a browser (double-click the
 file, no server needed). It gives you:
 
-- Every link above as a checkbox, grouped by category — check/uncheck to mix and match,
-  with a filter box to narrow the list
+- Every default link as a checkbox, grouped by category — check/uncheck to mix and
+  match, with a filter box to narrow the list
 - Your own custom links, added to an existing or brand-new category
 - A live preview of the overlay, plus a live-generated `javascript:` bookmarklet you can
   drag straight to your bookmarks bar or copy into a new bookmark's URL field
 - Import an existing RF Links bookmarklet to load its links back into the builder
 - Your selection remembered locally (`localStorage`) so it's still there next time
-
-## Links (plain reference)
-
-### User Guide & Home
-
-- [RF User Guide](https://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html)
-- [robotframework.org](https://robotframework.org/)
-- [Docs & libraries index](https://robotframework.org/robotframework/)
-- [GitHub · robotframework](https://github.com/robotframework/robotframework)
-
-### Community Resources
-
-- [Awesome Robot Framework](https://github.com/MarketSquare/awesome-robotframework)
-
-### Standard Libraries
-
-- [BuiltIn](https://robotframework.org/robotframework/latest/libraries/BuiltIn.html)
-- [Collections](https://robotframework.org/robotframework/latest/libraries/Collections.html)
-- [DateTime](https://robotframework.org/robotframework/latest/libraries/DateTime.html)
-- [Dialogs](https://robotframework.org/robotframework/latest/libraries/Dialogs.html)
-- [OperatingSystem](https://robotframework.org/robotframework/latest/libraries/OperatingSystem.html)
-- [Process](https://robotframework.org/robotframework/latest/libraries/Process.html)
-- [Screenshot](https://robotframework.org/robotframework/latest/libraries/Screenshot.html)
-- [String](https://robotframework.org/robotframework/latest/libraries/String.html)
-- [Telnet](https://robotframework.org/robotframework/latest/libraries/Telnet.html)
-- [XML](https://robotframework.org/robotframework/latest/libraries/XML.html)
-
-### External Libraries
-
-- [SeleniumLibrary](https://marketsquare.github.io/SeleniumLibrary/SeleniumLibrary.html)
-- [Browser (Playwright)](https://marketsquare.github.io/robotframework-browser/Browser.html)
-- [RequestsLibrary](https://marketsquare.github.io/robotframework-requests/doc/RequestsLibrary.html)
-- [AppiumLibrary](http://serhatbolsu.github.io/robotframework-appiumlibrary/AppiumLibrary.html)
-- [DatabaseLibrary](https://marketsquare.github.io/Robotframework-Database-Library/)
-- [SSHLibrary](https://marketsquare.github.io/SSHLibrary/SSHLibrary.html)
-
-### Tooling
-
-- [Robot Framework Dashboard](https://github.com/MarketSquare/robotframework-dashboard)
-- [Robocop (linter)](https://robocop.readthedocs.io/)
-- [RobotCode (IDE support)](https://robotcode.io/)
-- [Pabot (parallel)](https://pabot.org/)
-- [RIDE (editor)](https://github.com/robotframework/RIDE)
 
 ## Notes & limitations
 
