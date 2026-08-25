@@ -59,7 +59,6 @@ the file, no server needed) if you'd rather not rely on a hosted page. It gives 
   overlay — reopen to see the new theme applied.
 - **Strict CSP:** a few sites block injected scripts entirely; the bookmarklet won't run
   there. The embedded SVG logo avoids the more common image-blocking case.
-- The robot icon is original artwork, not the official Robot Framework trademark/logo.
 
 ## Repo layout
 
