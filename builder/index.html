@@ -100,11 +100,41 @@
     flex: 1;
     min-height: 0;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(340px, 470px);
+    grid-template-columns: minmax(0, 1fr) 14px minmax(340px, 520px);
   }
   @media (max-width: 860px) {
     main { grid-template-columns: minmax(0, 1fr); }
+    .divider { display: none; }
   }
+
+  .divider {
+    position: relative;
+    cursor: col-resize;
+    touch-action: none;
+  }
+  .divider::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0; left: 50%;
+    border-left: 1px dashed var(--bd);
+  }
+  .divider .grip {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    padding: 3px 2px;
+    border-radius: 4px;
+    background: var(--bg);
+    border: 1px solid var(--bd);
+    color: var(--faint);
+    font-size: 9px;
+    line-height: 1;
+  }
+  .divider:hover::before, .divider.dragging::before { border-color: var(--accent); }
+  .divider:hover .grip, .divider.dragging .grip { border-color: var(--accent); color: var(--accent); }
 
   .col-form {
     overflow: auto;
@@ -343,6 +373,10 @@
       </div>
     </section>
 
+  </div>
+
+  <div class="divider" id="colDivider" title="Drag to resize">
+    <span class="grip">&#8249;&#8250;</span>
   </div>
 
   <div class="col-preview">
@@ -1124,6 +1158,59 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  });
+
+  // --- Resizable preview column ---
+
+  var PREVIEW_WIDTH_KEY = 'rf-bookmarks-builder-preview-width';
+  var mainEl = document.querySelector('main');
+  var divider = document.getElementById('colDivider');
+
+  function clampPreviewWidth(px) {
+    var maxAllowed = Math.max(340, window.innerWidth - 380);
+    return Math.min(Math.max(px, 340), maxAllowed);
+  }
+
+  function applyPreviewWidth(px) {
+    if (window.innerWidth <= 860) {
+      mainEl.style.gridTemplateColumns = '';
+      return;
+    }
+    mainEl.style.gridTemplateColumns = 'minmax(0, 1fr) 14px ' + px + 'px';
+  }
+
+  var savedPreviewWidth = parseInt(localStorage.getItem(PREVIEW_WIDTH_KEY), 10);
+  var previewWidth = clampPreviewWidth(isNaN(savedPreviewWidth) ? 520 : savedPreviewWidth);
+  applyPreviewWidth(previewWidth);
+
+  window.addEventListener('resize', function () {
+    previewWidth = clampPreviewWidth(previewWidth);
+    applyPreviewWidth(previewWidth);
+  });
+
+  divider.addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    divider.setPointerCapture(e.pointerId);
+    divider.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    function onMove(ev) {
+      var rect = mainEl.getBoundingClientRect();
+      previewWidth = clampPreviewWidth(rect.right - ev.clientX - 7);
+      applyPreviewWidth(previewWidth);
+    }
+    function onUp() {
+      divider.releasePointerCapture(e.pointerId);
+      divider.classList.remove('dragging');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      localStorage.setItem(PREVIEW_WIDTH_KEY, String(previewWidth));
+      divider.removeEventListener('pointermove', onMove);
+      divider.removeEventListener('pointerup', onUp);
+    }
+    divider.addEventListener('pointermove', onMove);
+    divider.addEventListener('pointerup', onUp);
   });
 
   paintTheme();

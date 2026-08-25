@@ -14,8 +14,6 @@ browser bookmark.
   <kbd>⌘/Ctrl+Enter</kbd> to force a new tab, **Esc** to close
 - 🗂 **Grouped** — User Guide, Standard Libraries, External Libraries, Tooling
 - 🌙 **Dark / light** theme (dark by default, remembered per site)
-- 🤖 **Self-contained** — the robot logo is an embedded SVG data URI, so it renders
-  offline and under strict Content-Security-Policy sites
 - Close with the backdrop, the **ESC** button, or the **Esc** key
 
 ## Install
@@ -40,8 +38,9 @@ javascript:(function(){var ID="__rfbm",ex=document.getElementById(ID);if(ex){ex.
 ## Build your own
 
 Want a different mix of links, your own categories, or a different bookmark name?
-Open [`builder/index.html`](builder/index.html) directly in a browser (double-click the
-file, no server needed). It gives you:
+Use the hosted builder at **https://mobynl.github.io/robotframework-bookmarks/builder/**,
+or open [`builder/index.html`](builder/index.html) directly in a browser (double-click
+the file, no server needed) if you'd rather not rely on a hosted page. It gives you:
 
 - Every default link as a checkbox, grouped by category — check/uncheck to mix and
   match, with a filter box to narrow the list
