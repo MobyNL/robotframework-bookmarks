@@ -4,251 +4,384 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RF Links — Bookmarklet Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --accent: #00c0b5;
-    --bg: #fff;
-    --fg: #1c1f26;
-    --mut: #6b7280;
-    --bd: #e2e5ea;
-    --fld: #f4f5f7;
-    --hov: #f0fdfc;
-    --card: #fafbfc;
+    --page: #f7f7f5;
+    --aside: #f2f2ef;
+    --bar: #ffffff;
+    --bg: #ffffff;
+    --fld: #fafaf8;
+    --head: #f4f4f1;
+    --scrim: #e7e7e3;
+    --fg: #14171c;
+    --mut: #6f7681;
+    --faint: #a3a9b3;
+    --bd: #dedfda;
+    --rule: #ecede8;
+    --hov: #f5f6f3;
+    --shadow: 0 18px 44px rgba(20, 23, 28, .16);
+    --accent-ink: #06201e;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #14161a;
-      --fg: #e6e8ec;
-      --mut: #9aa1ad;
-      --bd: #2c313b;
-      --fld: #1d2027;
-      --hov: #182320;
-      --card: #1a1d23;
-    }
+  [data-theme="dark"] {
+    --page: #0b0d10;
+    --aside: #0e1115;
+    --bar: #0c0f13;
+    --bg: #101317;
+    --fld: #0d1014;
+    --head: #14181d;
+    --scrim: #07090b;
+    --fg: #e8eaee;
+    --mut: #767f8d;
+    --faint: #4b5361;
+    --bd: #232830;
+    --rule: #1b2027;
+    --hov: #161b21;
+    --shadow: 0 18px 44px rgba(0, 0, 0, .55);
   }
   * { box-sizing: border-box; }
+  html, body { height: 100%; }
   body {
     margin: 0;
-    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--page);
     color: var(--fg);
-    line-height: 1.45;
+    display: flex;
+    flex-direction: column;
   }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: var(--bd); border-radius: 6px; }
+  input[type="checkbox"] { accent-color: var(--accent); }
+  a { color: var(--accent); }
+
   header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 20px 24px;
+    gap: 14px;
+    height: 52px;
+    padding: 0 18px;
     border-bottom: 1px solid var(--bd);
+    background: var(--bar);
+    flex: none;
   }
   header img { display: block; }
-  header h1 { font-size: 18px; margin: 0; }
-  header p { margin: 2px 0 0; font-size: 13px; color: var(--mut); }
-  main {
-    max-width: 920px;
-    margin: 0 auto;
-    padding: 24px;
-    display: grid;
-    gap: 24px;
+  header .brand { font-size: 13px; font-weight: 700; letter-spacing: -.01em; }
+  header .sub {
+    font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--mut);
+    border-left: 1px solid var(--bd); padding-left: 14px;
   }
-  section.card {
-    border: 1px solid var(--bd);
-    border-radius: 12px;
-    background: var(--card);
-    padding: 16px 18px;
-  }
-  section.card > h2 {
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: var(--mut);
-    margin: 0 0 12px;
-  }
-  label { font-size: 14px; }
-  input[type="text"], input[type="url"] {
-    width: 100%;
-    padding: 8px 10px;
-    border: 1px solid var(--bd);
-    border-radius: 8px;
-    background: var(--fld);
-    color: var(--fg);
-    font-size: 14px;
-    outline: none;
-  }
-  input[type="text"]:focus, input[type="url"]:focus { border-color: var(--accent); }
-  button {
+  header .spacer { flex: 1; }
+  header .selcount { font-size: 10px; letter-spacing: .08em; color: var(--mut); }
+
+  .btn {
     cursor: pointer;
+    font-family: inherit;
     border: 1px solid var(--bd);
     background: transparent;
-    color: var(--fg);
-    border-radius: 8px;
-    padding: 7px 12px;
-    font-size: 13px;
+    color: var(--mut);
+    border-radius: 4px;
+    line-height: 1;
   }
-  button:hover { background: var(--hov); border-color: var(--accent); }
-  button.primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #06201e;
-    font-weight: 600;
+  .btn-ghost { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; padding: 4px 8px; }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-lg { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--fg); padding: 0 14px; height: 34px; }
+  .btn-lg:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-primary {
+    cursor: pointer; font-family: inherit; border: 1px solid var(--accent); background: var(--accent);
+    color: var(--accent-ink); font-weight: 700; border-radius: 5px; font-size: 11px;
+    letter-spacing: .1em; text-transform: uppercase;
   }
-  button.primary:hover { filter: brightness(1.05); }
-  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  .toolbar { margin-bottom: 14px; }
-  fieldset {
-    border: 1px solid var(--bd);
-    border-radius: 10px;
-    margin: 0 0 12px;
-    padding: 10px 12px 12px;
-  }
-  fieldset:last-child { margin-bottom: 0; }
-  legend {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 6px;
-    font-weight: 600;
-    font-size: 13px;
-  }
-  legend .legend-actions { font-weight: 400; }
-  legend .legend-actions button { padding: 3px 8px; font-size: 12px; }
-  .link-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 4px;
-    border-radius: 6px;
-    font-size: 13px;
-  }
-  .link-row:hover { background: var(--hov); }
-  .link-row label { flex: 1; cursor: pointer; }
-  .link-row small { display: block; color: var(--mut); font-size: 11px; word-break: break-all; }
-  .link-row button.remove { padding: 2px 7px; font-size: 12px; color: #c0392b; border-color: transparent; }
-  .link-row button { padding: 2px 7px; font-size: 12px; }
-  .link-row button[disabled] { opacity: .3; cursor: default; }
-  .link-row button[disabled]:hover { background: transparent; border-color: var(--bd); }
-  .custom-form {
+  .btn-primary:hover { filter: brightness(1.05); }
+
+  main {
+    flex: 1;
+    min-height: 0;
     display: grid;
-    grid-template-columns: 1fr 1fr 1.4fr auto;
-    gap: 8px;
-    margin-top: 10px;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 470px);
   }
-  .custom-form input { min-width: 0; }
-  @media (max-width: 640px) {
-    .custom-form { grid-template-columns: 1fr; }
+  @media (max-width: 860px) {
+    main { grid-template-columns: minmax(0, 1fr); }
   }
+
+  .col-form {
+    overflow: auto;
+    padding: 22px 22px 60px;
+    border-right: 1px solid var(--bd);
+    display: grid;
+    align-content: start;
+    gap: 26px;
+  }
+  .col-preview { overflow: auto; padding: 22px 22px 60px; background: var(--aside); display: grid; align-content: start; gap: 22px; }
+
+  section.step { display: grid; align-content: start; gap: 12px; }
+  .step-head { display: flex; align-items: center; gap: 10px; }
+  .step-head .no { font-size: 10px; color: var(--accent); letter-spacing: .1em; }
+  .step-head .name { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--mut); }
+  .step-head .rule { flex: 1; height: 1px; background: var(--rule); }
+
+  .field {
+    display: flex; align-items: center; gap: 10px; border: 1px solid var(--bd); border-radius: 5px;
+    background: var(--fld); padding: 0 12px; height: 38px;
+  }
+  .field .tag { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); white-space: nowrap; }
+  .field input {
+    flex: 1; min-width: 0; border: 0; outline: none; background: transparent; color: var(--fg);
+    font-family: inherit; font-size: 13px;
+  }
+  .identity-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+
+  .search {
+    display: flex; align-items: center; gap: 10px; border: 1px solid var(--bd); border-radius: 5px;
+    background: var(--fld); padding: 0 12px; height: 36px;
+  }
+  .search .chev { color: var(--accent); font-size: 13px; line-height: 1; }
+  .search input {
+    flex: 1; min-width: 0; border: 0; outline: none; background: transparent; color: var(--fg);
+    font-family: inherit; font-size: 12px;
+  }
+  .search .count { font-size: 10px; color: var(--faint); }
+
+  .presets { border: 1px solid var(--bd); border-radius: 6px; overflow: hidden; }
+  .preset-group-head {
+    display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--head);
+    border-bottom: 1px solid var(--rule);
+  }
+  .preset-group-head .drag { color: var(--faint); font-size: 11px; letter-spacing: -.1em; }
+  .preset-group-head .name { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
+  .preset-group-head .tally { font-size: 10px; color: var(--faint); }
+  .preset-group-head .spacer { flex: 1; }
+
+  .preset-row {
+    display: flex; align-items: center; gap: 10px; padding: 6px 12px; cursor: pointer;
+    border-bottom: 1px solid var(--rule);
+  }
+  .preset-row:last-child { border-bottom: 0; }
+  .preset-row:hover { background: var(--hov); }
+  .preset-row .drag { color: var(--faint); font-size: 11px; letter-spacing: -.1em; }
+  .preset-row input[type="checkbox"] { width: 13px; height: 13px; flex: none; cursor: pointer; }
+  .preset-row .label { font-size: 12px; font-weight: 500; white-space: nowrap; }
+  .preset-row .label.off { color: var(--mut); }
+  .preset-row .url {
+    flex: 1; min-width: 0; font-size: 10px; color: var(--faint); overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; text-align: right;
+  }
+  .no-match { padding: 26px; text-align: center; font-size: 11px; color: var(--mut); }
+
+  .custom-row {
+    display: flex; align-items: center; gap: 10px; padding: 6px 10px; border: 1px solid var(--bd);
+    border-radius: 5px; background: var(--fld); margin-bottom: 8px;
+  }
+  .custom-row .drag { color: var(--faint); font-size: 11px; letter-spacing: -.1em; }
+  .custom-row .label { font-size: 12px; font-weight: 500; }
+  .custom-row .cat {
+    font-size: 10px; color: var(--accent); border: 1px solid var(--bd); border-radius: 3px;
+    padding: 2px 6px; line-height: 1;
+  }
+  .custom-row .url {
+    flex: 1; min-width: 0; font-size: 10px; color: var(--faint); overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; text-align: right;
+  }
+  .custom-form { display: grid; grid-template-columns: 1fr 1fr 1.5fr auto; gap: 8px; }
+  .custom-form input {
+    min-width: 0; border: 1px solid var(--bd); border-radius: 5px; background: var(--fld); color: var(--fg);
+    font-family: inherit; font-size: 11px; padding: 0 10px; height: 34px; outline: none;
+  }
+  .custom-form input:focus { border-color: var(--accent); }
+  .custom-form button { padding: 0 16px; height: 34px; }
+  @media (max-width: 640px) { .custom-form { grid-template-columns: 1fr; } }
+  .hint { font-size: 11px; color: var(--mut); margin: 0; }
+
+  .import-box { display: grid; gap: 8px; }
   .mono {
-    width: 100%;
-    min-height: 110px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 12px;
-    padding: 10px;
-    border: 1px solid var(--bd);
-    border-radius: 8px;
-    background: var(--fld);
-    color: var(--fg);
-    resize: vertical;
+    width: 100%; min-height: 74px; font-family: inherit; font-size: 11px; padding: 10px;
+    border: 1px solid var(--bd); border-radius: 6px; background: var(--fld); color: var(--fg); resize: vertical;
   }
   .mono:focus { border-color: var(--accent); outline: none; }
-  .edit-form {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1.4fr auto auto;
-    gap: 8px;
-    flex: 1;
-    align-items: center;
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+  .preview-shell { border: 1px solid var(--bd); border-radius: 6px; background: var(--scrim); padding: 20px 16px; }
+  .preview-panel { background: var(--bg); border: 1px solid var(--bd); border-radius: 5px; box-shadow: var(--shadow); overflow: hidden; }
+  .preview-bar {
+    display: flex; align-items: center; gap: 8px; padding: 0 10px; height: 40px; border-bottom: 1px solid var(--bd);
+    background: var(--bar);
   }
-  .edit-form input { min-width: 0; }
-  @media (max-width: 640px) {
-    .edit-form { grid-template-columns: 1fr; }
+  .preview-bar .chev { color: var(--accent); font-size: 12px; line-height: 1; }
+  .preview-bar .ph { flex: 1; font-size: 12px; color: var(--faint); }
+  .preview-bar .esc {
+    font-size: 9px; letter-spacing: .08em; color: var(--faint); border: 1px solid var(--bd); border-radius: 3px;
+    padding: 3px 5px; line-height: 1;
   }
+  .preview-body { max-height: 260px; overflow: auto; padding: 4px 0 8px; }
+  .preview-group-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px 4px; }
+  .preview-group-head .name { font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--mut); white-space: nowrap; }
+  .preview-group-head .rule { flex: 1; height: 1px; background: var(--rule); }
+  .preview-row { display: flex; align-items: center; gap: 8px; padding: 5px 12px 5px 10px; }
+  .preview-row .bar { width: 2px; align-self: stretch; background: transparent; border-radius: 1px; }
+  .preview-row.hot { background: rgba(0, 192, 181, .10); }
+  .preview-row.hot .bar { background: var(--accent); }
+  .preview-row .label { font-size: 12px; font-weight: 500; white-space: nowrap; }
+  .preview-row .url {
+    flex: 1; min-width: 0; font-size: 10px; color: var(--faint); overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; text-align: right;
+  }
+  .preview-empty { padding: 30px 12px; text-align: center; font-size: 11px; color: var(--mut); }
+  .preview-foot {
+    display: flex; align-items: center; gap: 12px; height: 28px; padding: 0 12px; border-top: 1px solid var(--bd);
+    background: var(--bar); font-size: 9px; letter-spacing: .06em; color: var(--mut);
+  }
+  .preview-foot .brand { margin-left: auto; color: var(--faint); }
+
   #dragLink {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border-radius: 8px;
-    background: var(--accent);
-    color: #06201e;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: grab;
+    display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; height: 38px; border-radius: 5px;
+    background: var(--accent); color: var(--accent-ink); text-decoration: none; font-weight: 700; font-size: 12px;
+    letter-spacing: .02em; cursor: grab;
   }
-  #charCount { font-size: 12px; color: var(--mut); }
-  .hint { font-size: 12px; color: var(--mut); margin-top: 6px; }
-  #copyStatus { font-size: 12px; color: var(--accent); }
+  #dragLink .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-ink); display: block; }
+  #charCount { font-size: 10px; color: var(--faint); }
+  #copyStatus { font-size: 10px; color: var(--accent); }
+  #importStatus { font-size: 11px; }
+
+  .code-box {
+    border: 1px solid var(--bd); border-radius: 5px; background: var(--fld); padding: 10px 12px; font-size: 10px;
+    line-height: 1.6; color: var(--mut); max-height: 110px; overflow: auto; word-break: break-all;
+  }
+
+  .kbd-grid { display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; font-size: 10px; color: var(--mut); align-items: center; }
+  .kbd-grid kbd {
+    border: 1px solid var(--bd); border-radius: 3px; padding: 3px 6px; color: var(--fg); font-size: 10px;
+    line-height: 1; text-align: center; font-style: normal;
+  }
 </style>
 </head>
 <body>
 
 <header>
-  <img width="28" height="28" alt=""
+  <img width="20" height="20" alt=""
     src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyNCAyNCc+PHJlY3QgeD0nNCcgeT0nNycgd2lkdGg9JzE2JyBoZWlnaHQ9JzEyJyByeD0nMycgZmlsbD0nIzAwYzBiNScvPjxyZWN0IHg9JzExJyB5PScyLjUnIHdpZHRoPScyJyBoZWlnaHQ9JzQuNScgcng9JzEnIGZpbGw9JyMwMGMwYjUnLz48Y2lyY2xlIGN4PScxMicgY3k9JzIuMicgcj0nMS43JyBmaWxsPScjMDBjMGI1Jy8+PGNpcmNsZSBjeD0nOScgY3k9JzEzJyByPScxLjknIGZpbGw9JyNmZmZmZmYnLz48Y2lyY2xlIGN4PScxNScgY3k9JzEzJyByPScxLjknIGZpbGw9JyNmZmZmZmYnLz48cmVjdCB4PSc5JyB5PScxNi4yJyB3aWR0aD0nNicgaGVpZ2h0PScxLjYnIHJ4PScuOCcgZmlsbD0nI2ZmZmZmZicvPjwvc3ZnPg==">
-  <div>
-    <h1>RF Links — Bookmarklet Builder</h1>
-    <p>Pick which links to include, add your own, drag the result to your bookmarks bar.</p>
-  </div>
+  <span class="brand">rf&#8201;links</span>
+  <span class="sub">bookmarklet builder</span>
+  <span class="spacer"></span>
+  <span class="selcount" id="selCount"></span>
+  <button class="btn btn-ghost" id="themeToggle">DARK</button>
 </header>
 
 <main>
+  <div class="col-form">
 
-  <section class="card">
-    <h2>Bookmark name</h2>
-    <input type="text" id="titleInput" maxlength="40" value="RF Links">
-    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;cursor:pointer">
-      <input type="checkbox" id="newTabInput" checked style="width:auto">
-      Open links in a new tab (unchecked: opens in the current tab)
-    </label>
-  </section>
+    <section class="step">
+      <div class="step-head">
+        <span class="no">01</span><span class="name">identity</span><span class="rule"></span>
+      </div>
+      <div class="identity-row">
+        <label class="field">
+          <span class="tag">name</span>
+          <input type="text" id="titleInput" maxlength="40" value="RF Links">
+        </label>
+        <button class="btn" id="newTabInput" type="button"></button>
+      </div>
+    </section>
 
-  <section class="card">
-    <h2>Import an existing bookmarklet</h2>
-    <p class="hint" style="margin:0 0 8px">Paste a bookmarklet made by this builder (or the
-      default one from the README) to load its links here for editing. This replaces your
-      current selection below.</p>
-    <textarea id="importInput" class="mono" rows="4" spellcheck="false"
-      placeholder="javascript:(function(){...})();"></textarea>
-    <div class="row" style="margin-top:8px">
-      <button id="importBtn" class="primary">Import</button>
-      <span id="importStatus" class="hint" style="margin:0"></span>
+    <section class="step">
+      <div class="step-head">
+        <span class="no">02</span><span class="name">links</span><span class="rule"></span>
+        <button class="btn btn-ghost" id="selectAll">all</button>
+        <button class="btn btn-ghost" id="selectNone">none</button>
+        <button class="btn btn-ghost" id="selectDefaults">reset</button>
+      </div>
+      <div class="search">
+        <span class="chev">&#8250;</span>
+        <input id="presetFilter" placeholder="filter presets by name, category or url" spellcheck="false">
+        <span class="count" id="presetFilterCount"></span>
+      </div>
+      <div class="presets" id="presetList"></div>
+    </section>
+
+    <section class="step">
+      <div class="step-head">
+        <span class="no">03</span><span class="name">your own</span><span class="rule"></span>
+      </div>
+      <div id="customList"></div>
+      <div class="custom-form">
+        <input type="text" id="customCategory" placeholder="category" list="categoryOptions">
+        <input type="text" id="customLabel" placeholder="label">
+        <input type="url" id="customUrl" placeholder="https://…">
+        <button id="addCustom" class="btn-primary">add</button>
+      </div>
+      <datalist id="categoryOptions"></datalist>
+      <p class="hint">New category names create a new group; existing names append to that group.</p>
+    </section>
+
+    <section class="step">
+      <div class="step-head">
+        <span class="no">04</span><span class="name">import existing</span><span class="rule"></span>
+      </div>
+      <div class="import-box">
+        <p class="hint">Paste a bookmarklet made by this builder to load its links here for editing —
+          replaces your current selection.</p>
+        <textarea id="importInput" class="mono" rows="3" spellcheck="false"
+          placeholder="javascript:(function(){...})();"></textarea>
+        <div class="row">
+          <button id="importBtn" class="btn-lg">import</button>
+          <span id="importStatus" class="hint"></span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="col-preview">
+
+    <div class="step-head">
+      <span class="name">live preview</span><span class="rule"></span>
+      <span class="count" id="previewThemeName"></span>
     </div>
-  </section>
 
-  <section class="card">
-    <h2>Presets — mix &amp; match</h2>
-    <div class="row toolbar">
-      <button id="selectAll">Select all</button>
-      <button id="selectNone">Select none</button>
-      <button id="selectDefaults">Reset to repo defaults</button>
+    <div class="preview-shell">
+      <div class="preview-panel">
+        <div class="preview-bar">
+          <span class="chev">&#8250;</span>
+          <span class="ph">search links, categories, urls</span>
+          <span class="esc">ESC</span>
+        </div>
+        <div class="preview-body" id="previewBody"></div>
+        <div class="preview-foot">
+          <span>&#8593;&#8595; move</span><span>&#8629; open</span>
+          <span class="brand" id="previewTitle"></span>
+        </div>
+      </div>
     </div>
-    <div id="presetList"></div>
-  </section>
 
-  <section class="card">
-    <h2>Your own links</h2>
-    <div id="customList"></div>
-    <div class="custom-form">
-      <input type="text" id="customCategory" placeholder="Category (existing or new)" list="categoryOptions">
-      <input type="text" id="customLabel" placeholder="Label">
-      <input type="url" id="customUrl" placeholder="https://…">
-      <button id="addCustom" class="primary">Add</button>
+    <div class="step-head">
+      <span class="name">install</span><span class="rule"></span>
+      <span class="count" id="charCount"></span>
     </div>
-    <datalist id="categoryOptions"></datalist>
-    <p class="hint">New category names create a new group in the overlay; existing names append to that group.</p>
-  </section>
 
-  <section class="card">
-    <h2>Your bookmarklet</h2>
-    <p class="hint">Drag this to your bookmarks bar, or copy the text below into a new bookmark's URL field.</p>
-    <p><a id="dragLink" href="javascript:void(0)">RF Links</a></p>
-    <textarea id="output" class="mono" readonly spellcheck="false"></textarea>
-    <div class="row" style="margin-top:8px">
-      <button id="copyBtn">Copy to clipboard</button>
-      <span id="copyStatus"></span>
-      <span id="charCount" style="margin-left:auto"></span>
+    <div style="display:grid;align-content:start;gap:12px">
+      <div class="row">
+        <a id="dragLink" href="javascript:void(0)"><span class="dot"></span>RF Links</a>
+        <span class="hint">drag to your bookmarks bar</span>
+      </div>
+      <div class="code-box" id="codePreview"></div>
+      <div class="row">
+        <button id="copyBtn" class="btn-lg">copy</button>
+        <span id="copyStatus"></span>
+      </div>
     </div>
-  </section>
 
+    <div class="step-head">
+      <span class="name">shortcuts</span><span class="rule"></span>
+    </div>
+    <div class="kbd-grid">
+      <kbd>&#8593;&#8595;</kbd><span>move selection in the overlay</span>
+      <kbd>&#8629;</kbd><span>open the selected link</span>
+      <kbd>&#8984;&#8629;</kbd><span>open the selected link in a new tab</span>
+      <kbd>ESC</kbd><span>close the overlay</span>
+    </div>
+
+  </div>
 </main>
 
 <script src="../data/links.js"></script>
@@ -257,6 +390,7 @@
 (function () {
   var DEFAULTS = window.RF_BOOKMARKS_DEFAULT;
   var STORAGE_KEY = 'rf-bookmarks-builder-state-v1';
+  var THEME_KEY = 'rf-bookmarks-builder-theme';
 
   function defaultState() {
     var selected = {};
@@ -283,10 +417,40 @@
   }
 
   var state = loadState() || defaultState();
+  var filter = '';
 
   function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
+
+  // --- Theme (builder chrome only) ---
+
+  function loadDark() {
+    var saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'dark') return true;
+    if (saved === 'light') return false;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+
+  var dark = loadDark();
+
+  function paintTheme() {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.getElementById('themeToggle').textContent = dark ? 'LIGHT' : 'DARK';
+    document.getElementById('previewThemeName').textContent = dark ? 'dark' : 'light';
+  }
+
+  document.getElementById('themeToggle').addEventListener('click', function () {
+    dark = !dark;
+    localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
+    paintTheme();
+  });
+
+  // --- Shared helpers ---
+
+  function pad(n) { n = String(n); return n.length < 2 ? '0' + n : n; }
+  function short(url) { return url.replace(/^https?:\/\//, ''); }
+  function key(cat, label) { return cat + '::' + label; }
 
   function allCategoryNames() {
     var names = DEFAULTS.map(function (c) { return c[0]; });
@@ -306,79 +470,110 @@
     });
   }
 
+  // --- Presets (02) ---
+
   function renderPresets() {
     var container = document.getElementById('presetList');
     container.innerHTML = '';
-    DEFAULTS.forEach(function (cat) {
-      var fs = document.createElement('fieldset');
+    var f = filter.trim().toLowerCase();
+    var shownLinks = 0, totalLinks = 0;
+    var anyGroup = false;
 
-      var legend = document.createElement('legend');
-      var span = document.createElement('span');
-      span.textContent = cat[0];
-      legend.appendChild(span);
-      var actions = document.createElement('span');
-      actions.className = 'legend-actions';
+    DEFAULTS.forEach(function (cat) {
+      var links = cat[1].filter(function (l) {
+        totalLinks++;
+        return !f || (l[0] + ' ' + cat[0] + ' ' + l[1]).toLowerCase().indexOf(f) > -1;
+      });
+      if (!links.length) return;
+      anyGroup = true;
+      shownLinks += links.length;
+
+      var group = document.createElement('div');
+
+      var head = document.createElement('div');
+      head.className = 'preset-group-head';
+      var drag = document.createElement('span');
+      drag.className = 'drag';
+      drag.textContent = '⋮⋮';
+      var name = document.createElement('span');
+      name.className = 'name';
+      name.textContent = cat[0];
+      var tally = document.createElement('span');
+      tally.className = 'tally';
+      var onCount = cat[1].filter(function (l) { return !!state.selected[key(cat[0], l[0])]; }).length;
+      tally.textContent = pad(onCount) + '/' + pad(cat[1].length);
+      var spacer = document.createElement('span');
+      spacer.className = 'spacer';
       var allBtn = document.createElement('button');
       allBtn.type = 'button';
-      allBtn.textContent = 'All';
+      allBtn.className = 'btn btn-ghost';
+      allBtn.textContent = 'all';
       allBtn.addEventListener('click', function () {
-        cat[1].forEach(function (l) { state.selected[cat[0] + '::' + l[0]] = true; });
-        saveState(); renderPresets(); regenerate();
+        cat[1].forEach(function (l) { state.selected[key(cat[0], l[0])] = true; });
+        saveState(); renderPresets(); renderPreview();
       });
       var noneBtn = document.createElement('button');
       noneBtn.type = 'button';
-      noneBtn.textContent = 'None';
+      noneBtn.className = 'btn btn-ghost';
+      noneBtn.textContent = 'none';
       noneBtn.addEventListener('click', function () {
-        cat[1].forEach(function (l) { delete state.selected[cat[0] + '::' + l[0]]; });
-        saveState(); renderPresets(); regenerate();
+        cat[1].forEach(function (l) { delete state.selected[key(cat[0], l[0])]; });
+        saveState(); renderPresets(); renderPreview();
       });
-      actions.appendChild(allBtn);
-      actions.appendChild(noneBtn);
-      legend.appendChild(actions);
-      fs.appendChild(legend);
+      head.appendChild(drag);
+      head.appendChild(name);
+      head.appendChild(tally);
+      head.appendChild(spacer);
+      head.appendChild(allBtn);
+      head.appendChild(noneBtn);
+      group.appendChild(head);
 
-      cat[1].forEach(function (link) {
-        var key = cat[0] + '::' + link[0];
-        var row = document.createElement('div');
-        row.className = 'link-row';
+      links.forEach(function (link) {
+        var k = key(cat[0], link[0]);
+        var row = document.createElement('label');
+        row.className = 'preset-row';
+
+        var rdrag = document.createElement('span');
+        rdrag.className = 'drag';
+        rdrag.textContent = '⋮⋮';
 
         var cb = document.createElement('input');
         cb.type = 'checkbox';
-        cb.checked = !!state.selected[key];
-        cb.id = 'chk-' + key.replace(/[^a-z0-9]/gi, '-');
+        cb.checked = !!state.selected[k];
         cb.addEventListener('change', function () {
-          if (cb.checked) state.selected[key] = true; else delete state.selected[key];
-          saveState(); regenerate();
+          if (cb.checked) state.selected[k] = true; else delete state.selected[k];
+          saveState(); renderPresets(); renderPreview();
         });
 
-        var label = document.createElement('label');
-        label.setAttribute('for', cb.id);
+        var label = document.createElement('span');
+        label.className = 'label' + (cb.checked ? '' : ' off');
         label.textContent = link[0];
-        var small = document.createElement('small');
-        small.textContent = link[1];
-        label.appendChild(small);
 
+        var url = document.createElement('span');
+        url.className = 'url';
+        url.textContent = short(link[1]);
+
+        row.appendChild(rdrag);
         row.appendChild(cb);
         row.appendChild(label);
-        fs.appendChild(row);
+        row.appendChild(url);
+        group.appendChild(row);
       });
 
-      container.appendChild(fs);
+      container.appendChild(group);
     });
+
+    if (!anyGroup) {
+      var empty = document.createElement('div');
+      empty.className = 'no-match';
+      empty.textContent = 'no preset matches “' + filter.trim() + '”';
+      container.appendChild(empty);
+    }
+
+    document.getElementById('presetFilterCount').textContent = pad(shownLinks) + '/' + pad(totalLinks);
   }
 
-  var editingCustomIndex = -1;
-
-  function moveCustom(i, delta) {
-    var j = i + delta;
-    if (j < 0 || j >= state.custom.length) return;
-    var tmp = state.custom[i];
-    state.custom[i] = state.custom[j];
-    state.custom[j] = tmp;
-    if (editingCustomIndex === i) editingCustomIndex = j;
-    else if (editingCustomIndex === j) editingCustomIndex = i;
-    saveState(); renderCustom(); regenerate();
-  }
+  // --- Custom links (03) ---
 
   function validateEntry(category, label, url) {
     category = (category || '').trim();
@@ -398,6 +593,15 @@
     return { category: category, label: label, url: url };
   }
 
+  function moveCustom(i, delta) {
+    var j = i + delta;
+    if (j < 0 || j >= state.custom.length) return;
+    var tmp = state.custom[i];
+    state.custom[i] = state.custom[j];
+    state.custom[j] = tmp;
+    saveState(); renderCustom(); renderPreview();
+  }
+
   function renderCustom() {
     var container = document.getElementById('customList');
     container.innerHTML = '';
@@ -409,63 +613,27 @@
     }
     state.custom.forEach(function (entry, i) {
       var row = document.createElement('div');
-      row.className = 'link-row';
+      row.className = 'custom-row';
 
-      if (i === editingCustomIndex) {
-        var form = document.createElement('div');
-        form.className = 'edit-form';
+      var drag = document.createElement('span');
+      drag.className = 'drag';
+      drag.textContent = '⋮⋮';
 
-        var catInput = document.createElement('input');
-        catInput.type = 'text';
-        catInput.value = entry.category;
-        catInput.setAttribute('list', 'categoryOptions');
+      var label = document.createElement('span');
+      label.className = 'label';
+      label.textContent = entry.label;
 
-        var labelInput = document.createElement('input');
-        labelInput.type = 'text';
-        labelInput.value = entry.label;
+      var cat = document.createElement('span');
+      cat.className = 'cat';
+      cat.textContent = entry.category;
 
-        var urlInput = document.createElement('input');
-        urlInput.type = 'url';
-        urlInput.value = entry.url;
-
-        var saveBtn = document.createElement('button');
-        saveBtn.className = 'primary';
-        saveBtn.type = 'button';
-        saveBtn.textContent = 'Save';
-        saveBtn.addEventListener('click', function () {
-          var updated = validateEntry(catInput.value, labelInput.value, urlInput.value);
-          if (!updated) return;
-          state.custom[i] = updated;
-          editingCustomIndex = -1;
-          saveState(); renderCustom(); regenerate();
-        });
-
-        var cancelBtn = document.createElement('button');
-        cancelBtn.type = 'button';
-        cancelBtn.textContent = 'Cancel';
-        cancelBtn.addEventListener('click', function () {
-          editingCustomIndex = -1;
-          renderCustom();
-        });
-
-        form.appendChild(catInput);
-        form.appendChild(labelInput);
-        form.appendChild(urlInput);
-        form.appendChild(saveBtn);
-        form.appendChild(cancelBtn);
-        row.appendChild(form);
-        container.appendChild(row);
-        return;
-      }
-
-      var label = document.createElement('label');
-      label.textContent = entry.label + '  ·  ' + entry.category;
-      var small = document.createElement('small');
-      small.textContent = entry.url;
-      label.appendChild(small);
+      var url = document.createElement('span');
+      url.className = 'url';
+      url.textContent = short(entry.url);
 
       var upBtn = document.createElement('button');
       upBtn.type = 'button';
+      upBtn.className = 'btn btn-ghost';
       upBtn.textContent = '↑';
       upBtn.title = 'Move up';
       upBtn.disabled = i === 0;
@@ -473,45 +641,41 @@
 
       var downBtn = document.createElement('button');
       downBtn.type = 'button';
+      downBtn.className = 'btn btn-ghost';
       downBtn.textContent = '↓';
       downBtn.title = 'Move down';
       downBtn.disabled = i === state.custom.length - 1;
       downBtn.addEventListener('click', function () { moveCustom(i, 1); });
 
-      var editBtn = document.createElement('button');
-      editBtn.type = 'button';
-      editBtn.textContent = 'Edit';
-      editBtn.addEventListener('click', function () {
-        editingCustomIndex = i;
-        renderCustom();
-      });
-
       var removeBtn = document.createElement('button');
-      removeBtn.className = 'remove';
       removeBtn.type = 'button';
-      removeBtn.textContent = 'Remove';
+      removeBtn.className = 'btn btn-ghost';
+      removeBtn.textContent = 'del';
       removeBtn.addEventListener('click', function () {
         state.custom.splice(i, 1);
-        if (editingCustomIndex === i) editingCustomIndex = -1;
-        saveState(); renderCustom(); renderCategoryOptions(); regenerate();
+        saveState(); renderCustom(); renderCategoryOptions(); renderPreview();
       });
 
+      row.appendChild(drag);
       row.appendChild(label);
+      row.appendChild(cat);
+      row.appendChild(url);
       row.appendChild(upBtn);
       row.appendChild(downBtn);
-      row.appendChild(editBtn);
       row.appendChild(removeBtn);
       container.appendChild(row);
     });
     renderCategoryOptions();
   }
 
+  // --- Combine selections -> categories array (shape lib.js expects) ---
+
   function buildCategories() {
     var result = [];
     var catIndex = {};
     DEFAULTS.forEach(function (cat) {
       var links = cat[1].filter(function (link) {
-        return !!state.selected[cat[0] + '::' + link[0]];
+        return !!state.selected[key(cat[0], link[0])];
       });
       if (links.length) {
         catIndex[cat[0]] = result.length;
@@ -528,59 +692,131 @@
     return result;
   }
 
-  function regenerate() {
+  // --- Live preview (mirrors the overlay's look) ---
+
+  function renderPreview() {
     var categories = buildCategories();
+    var body = document.getElementById('previewBody');
+    body.innerHTML = '';
+    var total = 0;
+    var first = true;
+
+    categories.forEach(function (cat) {
+      var head = document.createElement('div');
+      head.className = 'preview-group-head';
+      var name = document.createElement('span');
+      name.className = 'name';
+      name.textContent = cat[0];
+      var rule = document.createElement('span');
+      rule.className = 'rule';
+      head.appendChild(name);
+      head.appendChild(rule);
+      body.appendChild(head);
+
+      cat[1].forEach(function (link) {
+        total++;
+        var row = document.createElement('div');
+        row.className = 'preview-row' + (first ? ' hot' : '');
+        first = false;
+        var bar = document.createElement('span');
+        bar.className = 'bar';
+        var label = document.createElement('span');
+        label.className = 'label';
+        label.textContent = link[0];
+        var url = document.createElement('span');
+        url.className = 'url';
+        url.textContent = short(link[1]);
+        row.appendChild(bar);
+        row.appendChild(label);
+        row.appendChild(url);
+        body.appendChild(row);
+      });
+    });
+
+    if (!total) {
+      var empty = document.createElement('div');
+      empty.className = 'preview-empty';
+      empty.textContent = 'select at least one link';
+      body.appendChild(empty);
+    }
+
+    document.getElementById('selCount').textContent = pad(total) + ' selected';
+    document.getElementById('previewTitle').textContent = state.title || 'RF Links';
+
+    regenerateBookmarklet(categories);
+  }
+
+  // --- Bookmarklet output ---
+
+  function regenerateBookmarklet(categories) {
     var title = state.title || 'RF Links';
     var bookmarklet = categories.length
       ? buildBookmarklet(categories, { title: title, newTab: state.newTab !== false })
       : '';
 
-    var output = document.getElementById('output');
     var dragLink = document.getElementById('dragLink');
     var charCount = document.getElementById('charCount');
+    var codePreview = document.getElementById('codePreview');
 
     if (!bookmarklet) {
-      output.value = '';
       dragLink.setAttribute('href', 'javascript:void(0)');
-      dragLink.textContent = 'Select at least one link';
+      dragLink.lastChild.textContent = 'Select at least one link';
       charCount.textContent = '';
+      codePreview.textContent = '';
       return;
     }
 
-    output.value = bookmarklet;
     dragLink.setAttribute('href', bookmarklet);
-    dragLink.textContent = title;
-    charCount.textContent = bookmarklet.length + ' characters';
+    dragLink.lastChild.textContent = title;
+    charCount.textContent = bookmarklet.length + ' chars';
+    codePreview.textContent = bookmarklet.length > 600 ? bookmarklet.slice(0, 600) + '…' : bookmarklet;
+    codePreview.dataset.full = bookmarklet;
   }
+
+  // --- Wiring ---
 
   document.getElementById('titleInput').addEventListener('input', function (e) {
     state.title = e.target.value;
     saveState();
-    regenerate();
+    renderPreview();
   });
 
-  document.getElementById('newTabInput').addEventListener('change', function (e) {
-    state.newTab = e.target.checked;
+  function paintNewTabBtn() {
+    var btn = document.getElementById('newTabInput');
+    btn.textContent = state.newTab !== false ? 'new tab · on' : 'new tab · off';
+    btn.className = 'btn' + (state.newTab !== false ? ' btn-ghost' : ' btn-ghost');
+    btn.style.borderColor = state.newTab !== false ? 'var(--accent)' : '';
+    btn.style.color = state.newTab !== false ? 'var(--accent)' : '';
+  }
+
+  document.getElementById('newTabInput').addEventListener('click', function () {
+    state.newTab = state.newTab === false;
     saveState();
-    regenerate();
+    paintNewTabBtn();
+    renderPreview();
+  });
+
+  document.getElementById('presetFilter').addEventListener('input', function (e) {
+    filter = e.target.value;
+    renderPresets();
   });
 
   document.getElementById('selectAll').addEventListener('click', function () {
     DEFAULTS.forEach(function (cat) {
-      cat[1].forEach(function (l) { state.selected[cat[0] + '::' + l[0]] = true; });
+      cat[1].forEach(function (l) { state.selected[key(cat[0], l[0])] = true; });
     });
-    saveState(); renderPresets(); regenerate();
+    saveState(); renderPresets(); renderPreview();
   });
 
   document.getElementById('selectNone').addEventListener('click', function () {
     state.selected = {};
-    saveState(); renderPresets(); regenerate();
+    saveState(); renderPresets(); renderPreview();
   });
 
   document.getElementById('selectDefaults').addEventListener('click', function () {
     var fresh = defaultState();
     state.selected = fresh.selected;
-    saveState(); renderPresets(); regenerate();
+    saveState(); renderPresets(); renderPreview();
   });
 
   document.getElementById('addCustom').addEventListener('click', function () {
@@ -596,7 +832,7 @@
     document.getElementById('customLabel').value = '';
     document.getElementById('customUrl').value = '';
     renderCustom();
-    regenerate();
+    renderPreview();
   });
 
   // --- Import: reconstruct builder state from a pasted bookmarklet ---
@@ -645,8 +881,8 @@
       }
     });
 
-    var titleMatch = text.match(/<span class="t">'\+"((?:[^"\\]|\\.)*)"\+'<\/span>/);
-    var title = titleMatch ? JSON.parse('"' + titleMatch[1] + '"') : 'RF Links';
+    var titleMatch = text.match(/var T=("(?:[^"\\]|\\.)*")/);
+    var title = titleMatch ? JSON.parse(titleMatch[1]) : 'RF Links';
     var newTab = text.indexOf('target="_blank"') !== -1;
 
     return { categories: categories, title: title, newTab: newTab };
@@ -655,7 +891,7 @@
   function applyImport(parsed) {
     var defaultUrl = {};
     DEFAULTS.forEach(function (cat) {
-      cat[1].forEach(function (l) { defaultUrl[cat[0] + '::' + l[0]] = l[1]; });
+      cat[1].forEach(function (l) { defaultUrl[key(cat[0], l[0])] = l[1]; });
     });
 
     var newSelected = {};
@@ -664,9 +900,9 @@
       var catName = cat[0];
       cat[1].forEach(function (link) {
         var label = link[0], url = link[1];
-        var key = catName + '::' + label;
-        if (defaultUrl[key] === url) {
-          newSelected[key] = true;
+        var k = key(catName, label);
+        if (defaultUrl[k] === url) {
+          newSelected[k] = true;
         } else {
           newCustom.push({ category: catName, label: label, url: url });
         }
@@ -677,14 +913,13 @@
     state.custom = newCustom;
     state.title = parsed.title || state.title;
     state.newTab = parsed.newTab;
-    editingCustomIndex = -1;
     saveState();
 
     document.getElementById('titleInput').value = state.title;
-    document.getElementById('newTabInput').checked = state.newTab;
+    paintNewTabBtn();
     renderPresets();
     renderCustom();
-    regenerate();
+    renderPreview();
   }
 
   document.getElementById('importBtn').addEventListener('click', function () {
@@ -703,30 +938,40 @@
   });
 
   document.getElementById('copyBtn').addEventListener('click', function () {
-    var output = document.getElementById('output');
     var status = document.getElementById('copyStatus');
+    var full = document.getElementById('codePreview').dataset.full || '';
     var done = function () {
       status.textContent = 'Copied!';
       setTimeout(function () { status.textContent = ''; }, 1500);
     };
+    if (!full) return;
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(output.value).then(done, function () {
-        output.select();
+      navigator.clipboard.writeText(full).then(done, function () {
+        var ta = document.createElement('textarea');
+        ta.value = full;
+        document.body.appendChild(ta);
+        ta.select();
         document.execCommand('copy');
+        document.body.removeChild(ta);
         done();
       });
     } else {
-      output.select();
+      var ta = document.createElement('textarea');
+      ta.value = full;
+      document.body.appendChild(ta);
+      ta.select();
       document.execCommand('copy');
+      document.body.removeChild(ta);
       done();
     }
   });
 
+  paintTheme();
   document.getElementById('titleInput').value = state.title || 'RF Links';
-  document.getElementById('newTabInput').checked = state.newTab !== false;
+  paintNewTabBtn();
   renderPresets();
   renderCustom();
-  regenerate();
+  renderPreview();
 })();
 </script>
 </body>
